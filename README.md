@@ -24,6 +24,7 @@ The project comprises the following key components:
 - `scripts/`: One-click training and testing scripts plus a GPU profiler.
 - `list/`: Data lists (CSV) and ground-truth annotations (npy), along with the scripts that generate them.
 - `tools/`: Text feature extraction script (CLIP text encoding of the generated descriptions).
+- `model/`: Pretrained weights (optional) and training checkpoints (generated).
 
 ## Installation
 
@@ -51,14 +52,7 @@ The CLIP backbone (`src/clip/`) is bundled in this repository, so no separate CL
 
 ## Data Preparation
 
-The repository does **not** bundle any extracted features. The **privileged text features** (unique to this method) are generated offline into `data/` before training:
-
-| Directory | Content |
-|-----------|---------|
-| `data/xd_text` | XD-Violence video-level text descriptions |
-| `data/ucf_text` | UCF-Crime video-level text descriptions |
-| `data/ucf_text_llm_snippets` | UCF-Crime snippet-level LLM text |
-| `data/xd_text_v2_snippets` | XD-Violence snippet-level LLM text (v2) |
+The repository bundles no extracted features; all features must be prepared offline before training.
 
 ### Text Generation and Feature Extraction
 
@@ -99,17 +93,17 @@ Video
 
 All text generation and text feature extraction are performed offline before training. Qwen3-VL-32B is not required during student inference.
 
-The **visual and audio features** are not bundled (large size) and must be extracted with common models and placed under `data/`:
+The **visual and audio features** are extracted with common models:
 
-| Feature | Extraction model | Output dim | Target path |
-|---------|------------------|------------|-------------|
-| Visual | CLIP **ViT-B/16** | 512 | `data/UCFClipFeatures` (UCF), `data/XDTrainClipFeatures` and `data/XDTestClipFeatures` (XD) |
-| Audio | **VGGish** | 128 | `data/xd_audio_vggish` (XD) |
+| Feature | Extraction model | Output dim |
+|---------|------------------|------------|
+| Visual | CLIP **ViT-B/16** | 512 |
+| Audio | **VGGish** | 128 |
 
 - **Visual features**: sample one frame per 16-frame snippet, apply the crop in `src/crop.py` (crop type 5: resize 340×256 → center 224×224 → horizontal flip), encode with the CLIP ViT-B/16 visual encoder to 512-d, and save one `.npy` per video with shape `(T, 512)`.
 - **Audio features**: extract with VGGish to 128-d and save one `.npy` per video.
 
-The `path` column of `list/*.csv` and the option defaults already point to these locations.
+The `path` column of `list/*.csv` and the option defaults point to the expected feature locations.
 
 ### Before Running
 
